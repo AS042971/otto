@@ -1,6 +1,6 @@
 import io
-import json
 import re
+import json
 
 import uvicorn
 
@@ -16,14 +16,26 @@ from functools import reduce
 from typing import Iterable, Union
 
 
-TARGET_SAMPLE_RATE = 44100
 ROOT = Path(__file__).parent
 ASSETS_DIR = ROOT / 'assets'
+
 CONFIG = json.loads((ROOT / 'config.json').read_text('utf8'))
-PINYIN, SPECIAL = CONFIG['pinyin'], CONFIG['special']
 
-app = FastAPI()
+# Pinyin audio list.
+PINYIN: dict[str, str] = CONFIG['pinyin']
 
+# Special audio list.
+SPECIAL: dict[str, Union[str, list[str]]] = CONFIG['special']
+
+# Silent audio segment duration(ms) for missing pinyin.
+MISSING_SILENT_DURATION: int = CONFIG['silentDuration']
+
+# Target sample rate.
+SAMPLE_RATE: int = CONFIG['sampleRate']
+
+
+# Port.
+PORT: int = CONFIG['port']
 
 
 def make_text_fragments(text: str) -> list[str]:
@@ -35,7 +47,7 @@ def load_audio_file(filename: Union[str, Iterable[str]]) -> AudioSegment:
         return normalize(
             AudioSegment.from_file(ASSETS_DIR / filename)
             .set_channels(1)
-            .set_frame_rate(TARGET_SAMPLE_RATE)
+            .set_frame_rate(SAMPLE_RATE)
         )
 
     return reduce(lambda a, b: a + b, (load_audio_file(file) for file in filename))
@@ -43,7 +55,7 @@ def load_audio_file(filename: Union[str, Iterable[str]]) -> AudioSegment:
 
 def load_pinyin(pinyin: str) -> AudioSegment:
     if pinyin not in PINYIN:
-        return AudioSegment.silent(500, TARGET_SAMPLE_RATE)
+        return AudioSegment.silent(MISSING_SILENT_DURATION, SAMPLE_RATE)
     return load_audio_file(PINYIN[pinyin])
 
 
@@ -59,6 +71,9 @@ def make_audio(text: str) -> AudioSegment:
     return audio
 
 
+app = FastAPI()
+
+
 @app.get('/otto')
 async def handle_otto(text: str):
     file = io.BytesIO()
@@ -69,4 +84,4 @@ async def handle_otto(text: str):
 
 
 if __name__ == '__main__':
-    uvicorn.run('__main__:app', port=8002)
+    uvicorn.run('__main__:app', port=PORT)
