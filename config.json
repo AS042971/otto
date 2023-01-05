@@ -26,6 +26,7 @@
     "cai": "cai.wav",
     "can": "can.wav",
     "cang": "cang.wav",
+    "ce": "cao.wav",
     "cao": "cao.wav",
     "ceng": "ceng.wav",
     "cha": "cha.wav",
@@ -372,7 +373,7 @@
     "\\+": "jia.wav",
     "-": "jian.wav",
     "\\*": "cheng.wav",
-    "\\/": "chu.wav",
+    "/": "chu.wav",
     "sin": [
       "sai.wav",
       "yin.wav"
