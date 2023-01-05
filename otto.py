@@ -23,10 +23,10 @@ ASSETS_DIR = ROOT / 'assets'
 
 CONFIG = json.loads((ROOT / 'config.json').read_text('utf8'))
 
-# Pinyin audio list.
+# Pinyin audio files.
 PINYIN: dict[str, str] = CONFIG['pinyin']
 
-# Special audio list.
+# Special audio files.
 SPECIAL: dict[str, Union[str, list[str]]] = CONFIG['special']
 
 # Silent audio segment duration(ms) for missing pinyin.
@@ -35,7 +35,7 @@ MISSING_SILENT_DURATION: int = CONFIG['silentDuration']
 # Target sample rate.
 SAMPLE_RATE: int = CONFIG['sampleRate']
 
-# Port.
+# Server port.
 PORT: int = CONFIG['port']
 
 # Special fragments mapping, especially for those with `\` to avoid being treated as regex.
