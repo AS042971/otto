@@ -404,6 +404,15 @@
       "lao.wav",
       "ge.wav"
     ],
+    "up": [
+      "a.wav",
+      "pu.wav"
+    ],
+    "apple": [
+      "a.wav",
+      "pu.wav",
+      "lu.wav"
+    ],
     "a": "ei.wav",
     "b": "bi.wav",
     "c": "xi.wav",
