@@ -33,7 +33,6 @@ MISSING_SILENT_DURATION: int = CONFIG['silentDuration']
 # Target sample rate.
 SAMPLE_RATE: int = CONFIG['sampleRate']
 
-
 # Port.
 PORT: int = CONFIG['port']
 
@@ -45,6 +44,15 @@ def break_text(text: str) -> list[str]:
     :return: text fragments.
     """
     return [t for t in re.split(f'({"|".join(SPECIAL.keys())})', text) if t]
+
+
+def merge_segments(segments: Iterable[AudioSegment]) -> AudioSegment:
+    """
+    Merge all segments.
+    :param segments: audio segments.
+    :return: merged audio segments.
+    """
+    return reduce(lambda a, b: a + b, segments)
 
 
 def load_audio_file(filename: Union[str, Iterable[str]]) -> AudioSegment:
@@ -60,7 +68,7 @@ def load_audio_file(filename: Union[str, Iterable[str]]) -> AudioSegment:
             .set_frame_rate(SAMPLE_RATE)
         )
 
-    return reduce(lambda a, b: a + b, (load_audio_file(file) for file in filename))
+    return merge_segments(load_audio_file(file) for file in filename)
 
 
 def load_pinyin_audio(pinyin: str) -> AudioSegment:
@@ -82,7 +90,7 @@ def load_fragment_audio(fragment: str) -> AudioSegment:
     """
     if fragment in SPECIAL:
         return load_audio_file(SPECIAL[fragment])
-    return reduce(lambda a, b: a + b, (load_pinyin_audio(pinyin) for pinyin in lazy_pinyin(fragment)))
+    return merge_segments(load_pinyin_audio(p) for p in lazy_pinyin(fragment))
 
 
 def make_audio(text: str) -> AudioSegment:
@@ -92,8 +100,7 @@ def make_audio(text: str) -> AudioSegment:
     :return: the audio segment.
     """
     fragments = break_text(text)
-    audio = reduce(lambda a, b: a + b, (load_fragment_audio(frag) for frag in fragments))
-    return audio
+    return merge_segments(load_fragment_audio(frag) for frag in fragments)
 
 
 app = FastAPI()
