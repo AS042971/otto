@@ -109,4 +109,4 @@ async def handle_otto(text: str):
 
 
 if __name__ == '__main__':
-    uvicorn.run('__main__:app', port=PORT, reload=True)
+    uvicorn.run('__main__:app', port=PORT)
