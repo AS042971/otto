@@ -365,6 +365,27 @@
     "zuo": "zuo.wav"
   },
   "special": {
+    "=": [
+      "deng.wav",
+      "yu.wav"
+    ],
+    "\\+": "jia.wav",
+    "-": "jian.wav",
+    "\\*": "cheng.wav",
+    "\\/": "chu.wav",
+    "sin": [
+      "sai.wav",
+      "yin.wav"
+    ],
+    "cos": [
+      "kou.wav",
+      "sai.wav",
+      "yin.wav"
+    ],
+    "tan": [
+      "tan.wav",
+      "zhen.wav"
+    ],
     "a": "ei.wav",
     "b": "bi.wav",
     "c": "xi.wav",
@@ -415,6 +436,11 @@
     "y": "wai.wav",
     "z": "zei.wav",
     "0": "ling.wav",
+    "100": [
+      "yi.wav",
+      "bai.wav"
+    ],
+    "10": "shi.wav",
     "1": "yi.wav",
     "2": "er.wav",
     "3": "san.wav",
@@ -424,12 +450,12 @@
     "7": "qi.wav",
     "8": "ba.wav",
     "9": "jiu.wav",
-    "米浴说的道理": "miyu.wav",
+    "今天来点儿大家想看的东西": "jtlaidian.wav",
+    "今天来点大家想看的东西": "jtlaidian.wav",
     "啊米浴说的道理": "miyu.wav",
+    "米浴说的道理": "miyu.wav",
     "大家好啊": "djha.wav",
     "我是说的道理": "wssddl.wav",
-    "今天来点大家想看的东西": "jtlaidian.wav",
-    "今天来点儿大家想看的东西": "jtlaidian.wav",
     "说的道理": "sddl.wav",
     "波比是我爹": "bobi.wav",
     "啊嘛波比是我爹": "bobi.wav",
