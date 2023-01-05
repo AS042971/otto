@@ -55,3 +55,10 @@ async def handle_otto(args: Message = CommandArg()):
 
 如果你不会用 `nonebot2`，请参考他们的官方文档，本项目与其无关。因为这个插件东西实在是太小了，几行就写完了，所以我就不再单独发插件。
 
+
+## 协议
+
+本项目使用 `MIT` 协议。注意，本协议不包括 `assets` 目录下的音频。
+
+
+关注[电棍](https://space.bilibili.com/628845081)谢谢喵。
