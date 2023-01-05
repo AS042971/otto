@@ -8,13 +8,10 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from pypinyin import lazy_pinyin
-
 from pydub import AudioSegment
 from pydub.effects import normalize
-
 from functools import reduce
-from typing import Iterable, Union
-
+from typing import Iterable, Union, Optional
 from pydantic import BaseModel
 
 
@@ -27,7 +24,12 @@ CONFIG = json.loads((ROOT / 'config.json').read_text('utf8'))
 PINYIN: dict[str, str] = CONFIG['pinyin']
 
 # Special audio files.
-SPECIAL: dict[str, Union[str, list[str]]] = CONFIG['special']
+# Use sorted list to ensure that longer words are ahead of shorter ones.
+SPECIAL: list[tuple[str, Union[str, list[str]]]] = sorted(
+    CONFIG['special'].items(),
+    key=lambda item: len(item[0]),
+    reverse=True
+)
 
 # Silent audio segment duration(ms) for missing pinyin.
 MISSING_SILENT_DURATION: int = CONFIG['silentDuration']
@@ -42,13 +44,25 @@ PORT: int = CONFIG['port']
 FRAGMENTS_MAP: dict[str, str] = CONFIG['fragmentsMap']
 
 
+def get_special(fragment: str) -> Optional[Union[str, list[str]]]:
+    """
+    Gets special fragment audio file or file list.
+    :param fragment: the fragment to get.
+    :return: the file or file list or None when it is not special.
+    """
+    for k, v in SPECIAL:
+        if k == fragment:
+            return v
+    return None
+
+
 def break_text(text: str) -> list[str]:
     """
     Breaks text into fragments.
     :param text: the text to break.
     :return: text fragments.
     """
-    return [FRAGMENTS_MAP.get(t, t) for t in re.split(f'({"|".join(SPECIAL.keys())})', text) if t]
+    return [FRAGMENTS_MAP.get(t, t) for t in re.split(f'({"|".join(word for word, _ in SPECIAL)})', text) if t]
 
 
 def merge_segments(segments: Iterable[AudioSegment]) -> AudioSegment:
@@ -93,8 +107,8 @@ def load_fragment_audio(fragment: str) -> AudioSegment:
     :param fragment: the fragment to load.
     :return: the audio segment.
     """
-    if fragment in SPECIAL:
-        return load_audio_file(SPECIAL[fragment])
+    if special := get_special(fragment):
+        return load_audio_file(special)
     return merge_segments(load_pinyin_audio(p) for p in lazy_pinyin(fragment))
 
 
