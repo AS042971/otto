@@ -15,6 +15,8 @@ from pydub.effects import normalize
 from functools import reduce
 from typing import Iterable, Union
 
+from pydantic import BaseModel
+
 
 ROOT = Path(__file__).parent
 ASSETS_DIR = ROOT / 'assets'
@@ -36,6 +38,9 @@ SAMPLE_RATE: int = CONFIG['sampleRate']
 # Port.
 PORT: int = CONFIG['port']
 
+# Special fragments mapping, especially for those with `\` to avoid being treated as regex.
+FRAGMENTS_MAP: dict[str, str] = CONFIG['fragmentsMap']
+
 
 def break_text(text: str) -> list[str]:
     """
@@ -43,7 +48,7 @@ def break_text(text: str) -> list[str]:
     :param text: the text to break.
     :return: text fragments.
     """
-    return [t for t in re.split(f'({"|".join(SPECIAL.keys())})', text) if t]
+    return [FRAGMENTS_MAP.get(t, t) for t in re.split(f'({"|".join(SPECIAL.keys())})', text) if t]
 
 
 def merge_segments(segments: Iterable[AudioSegment]) -> AudioSegment:
@@ -106,6 +111,10 @@ def make_audio(text: str) -> AudioSegment:
 app = FastAPI()
 
 
+class Body(BaseModel):
+    text: str
+
+
 @app.get('/otto')
 async def handle_otto(text: str):
     file = io.BytesIO()
@@ -113,6 +122,12 @@ async def handle_otto(text: str):
     data.export(file, format='wav')
     file.seek(0, 0)
     return StreamingResponse(file, media_type='audio/wav')
+
+
+@app.post('/otto')
+async def handle_post_otto(body: Body):
+    print(body.text)
+    return await handle_otto(body.text)
 
 
 if __name__ == '__main__':

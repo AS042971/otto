@@ -364,6 +364,11 @@
     "zun": "zun.wav",
     "zuo": "zuo.wav"
   },
+  "fragmentsMap": {
+    "+": "\\+",
+    "*": "\\*",
+    "/": "\\/"
+  },
   "special": {
     "=": [
       "deng.wav",

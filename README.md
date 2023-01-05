@@ -34,15 +34,18 @@
 
 你可以直接访问 `http://localhost:8002/otto?text=实例文本` 来获得语音，或者集中到其它的 `App` 中使用。
 
+在这里我更推荐你在自己的 `App` 中使用 `POST` 方法，因为直接 `GET` 方法可能导致一些特殊字符不能正确地被接收。
 
 这里以 [nonebot2](https://github.com/nonebot/nonebot2) 的 QQ 机器人为例，来演示如何将其集成到你的机器人中。
 
 ```python
 import aiohttp
+
 from nonebot import on_command
 from nonebot.adapters import Message
 from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11.message import MessageSegment
+
 
 otto = on_command('otto')
 
@@ -51,7 +54,7 @@ otto = on_command('otto')
 async def handle_otto(args: Message = CommandArg()):
     text = args.extract_plain_text()
     async with aiohttp.ClientSession() as session:
-        async with session.get(f'http://localhost:8002/otto?text={text}') as resp:
+        async with session.post('http://localhost:8002/otto', json={'text': text}) as resp:
             content = await resp.read()
     await otto.finish(MessageSegment.record(content))
 ```
