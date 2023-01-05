@@ -1,4 +1,5 @@
 import io
+import random
 import re
 import json
 
@@ -40,8 +41,13 @@ SAMPLE_RATE: int = CONFIG['sampleRate']
 # Server port.
 PORT: int = CONFIG['port']
 
-# Special fragments mapping, especially for those with `\` to avoid being treated as regex.
-FRAGMENTS_MAP: dict[str, str] = CONFIG['fragmentsMap']
+# All regexes in the special dictionary.
+REGEXES: list[tuple[str, re.Pattern]] = [
+    (regex, re.compile(regex))
+    for regex, _ in SPECIAL
+]
+
+REPLACE_SPECIAL_PATTERN = re.compile(f'({"|".join(regex for regex, _ in SPECIAL)})')
 
 
 def get_special(fragment: str) -> Optional[Union[str, list[str]]]:
@@ -59,10 +65,17 @@ def get_special(fragment: str) -> Optional[Union[str, list[str]]]:
 def break_text(text: str) -> list[str]:
     """
     Breaks text into fragments.
+    Special ones are represented by their regexes.
     :param text: the text to break.
     :return: text fragments.
     """
-    return [FRAGMENTS_MAP.get(t, t) for t in re.split(f'({"|".join(word for word, _ in SPECIAL)})', text) if t]
+    def replace_regex(fragment: str) -> str:
+        # Use regex to represent the fragment.
+        for regex, pattern in REGEXES:
+            if pattern.fullmatch(fragment):
+                return regex
+        return fragment
+    return [replace_regex(t) for t in REPLACE_SPECIAL_PATTERN.split(text) if t]
 
 
 def merge_segments(segments: Iterable[AudioSegment]) -> AudioSegment:
@@ -74,7 +87,7 @@ def merge_segments(segments: Iterable[AudioSegment]) -> AudioSegment:
     return reduce(lambda a, b: a + b, segments)
 
 
-def load_audio_file(filename: Union[str, Iterable[str]]) -> AudioSegment:
+def load_audio_file(filename: Union[str, list[str]]) -> AudioSegment:
     """
     Loads audio file or a list of audio files.
     :param filename: file name or a list of file names.
@@ -86,6 +99,10 @@ def load_audio_file(filename: Union[str, Iterable[str]]) -> AudioSegment:
             .set_channels(1)
             .set_frame_rate(SAMPLE_RATE)
         )
+
+    # Load a random audio from the list.
+    if filename[0] == 'RANDOM':
+        return load_audio_file(random.choice(filename[1:]))
 
     return merge_segments(load_audio_file(file) for file in filename)
 
