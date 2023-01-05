@@ -126,7 +126,6 @@ async def handle_otto(text: str):
 
 @app.post('/otto')
 async def handle_post_otto(body: Body):
-    print(body.text)
     return await handle_otto(body.text)
 
 
