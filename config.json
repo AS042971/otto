@@ -386,6 +386,19 @@
       "tan.wav",
       "zhen.wav"
     ],
+    "pi": "pai.wav",
+    "log": [
+      "lao.wav",
+      "ge.wav"
+    ],
+    "ln": [
+      "lao.wav",
+      "en.wav"
+    ],
+    "lg": [
+      "lao.wav",
+      "ge.wav"
+    ],
     "a": "ei.wav",
     "b": "bi.wav",
     "c": "xi.wav",
