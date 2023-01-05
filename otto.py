@@ -77,15 +77,6 @@ def break_text(text: str) -> list[str]:
     return [replace_regex(t) for t in SPECIAL_PATTERN.split(text) if t]
 
 
-def merge_segments(segments: Iterable[AudioSegment]) -> AudioSegment:
-    """
-    Merge all segments.
-    :param segments: audio segments.
-    :return: merged audio segments.
-    """
-    return reduce(lambda a, b: a + b, segments)
-
-
 def load_audio_file(filename: Union[str, list[str]]) -> AudioSegment:
     """
     Loads audio file or a list of audio files.
@@ -103,7 +94,7 @@ def load_audio_file(filename: Union[str, list[str]]) -> AudioSegment:
     if filename[0] == 'RANDOM':
         return load_audio_file(random.choice(filename[1:]))
 
-    return merge_segments(load_audio_file(file) for file in filename)
+    return sum(load_audio_file(file) for file in filename)
 
 
 def load_pinyin_audio(pinyin: str) -> AudioSegment:
@@ -125,7 +116,7 @@ def load_fragment_audio(fragment: str) -> AudioSegment:
     """
     if special := get_special(fragment):
         return load_audio_file(special)
-    return merge_segments(load_pinyin_audio(p) for p in lazy_pinyin(fragment))
+    return sum(load_pinyin_audio(p) for p in lazy_pinyin(fragment))
 
 
 def make_audio(text: str) -> AudioSegment:
@@ -135,7 +126,7 @@ def make_audio(text: str) -> AudioSegment:
     :return: the audio segment.
     """
     fragments = break_text(text)
-    return merge_segments(load_fragment_audio(frag) for frag in fragments)
+    return sum(load_fragment_audio(frag) for frag in fragments)
 
 
 app = FastAPI()
