@@ -45,7 +45,8 @@ REGEXES: list[tuple[str, re.Pattern]] = [
     for regex, _ in SPECIAL
 ]
 
-REPLACE_SPECIAL_PATTERN = re.compile(f'({"|".join(regex for regex, _ in SPECIAL)})')
+# The pattern with special regexes to break text.
+SPECIAL_PATTERN = re.compile(f'({"|".join(regex for regex, _ in SPECIAL)})')
 
 
 def get_special(fragment: str) -> Optional[Union[str, list[str]]]:
@@ -73,7 +74,7 @@ def break_text(text: str) -> list[str]:
             if pattern.fullmatch(fragment):
                 return regex
         return fragment
-    return [replace_regex(t) for t in REPLACE_SPECIAL_PATTERN.split(text) if t]
+    return [replace_regex(t) for t in SPECIAL_PATTERN.split(text) if t]
 
 
 def merge_segments(segments: Iterable[AudioSegment]) -> AudioSegment:
