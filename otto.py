@@ -21,6 +21,15 @@ ASSETS_DIR = ROOT / 'assets'
 
 CONFIG = json.loads((ROOT / 'config.json').read_text('utf8'))
 
+# Silent audio segment duration(ms) for missing pinyin.
+MISSING_SILENT_DURATION: int = CONFIG['silentDuration']
+
+# Target sample rate.
+SAMPLE_RATE: int = CONFIG['sampleRate']
+
+# Server port.
+PORT: int = CONFIG['port']
+
 # Pinyin audio files.
 PINYIN: dict[str, str] = CONFIG['pinyin']
 
@@ -31,15 +40,6 @@ SPECIAL: list[tuple[str, Union[str, list[str]]]] = sorted(
     key=lambda item: len(item[0]),
     reverse=True
 )
-
-# Silent audio segment duration(ms) for missing pinyin.
-MISSING_SILENT_DURATION: int = CONFIG['silentDuration']
-
-# Target sample rate.
-SAMPLE_RATE: int = CONFIG['sampleRate']
-
-# Server port.
-PORT: int = CONFIG['port']
 
 # All regexes in the special dictionary.
 REGEXES: list[tuple[str, re.Pattern]] = [
