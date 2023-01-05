@@ -101,8 +101,6 @@ async def handle_otto(args: Message = CommandArg()):
 
 这个值可以是一个字符串或者一个数组，按顺序写入 `assets` 目录下的音频文件名即可。
 
-默认来说，更长的单词优先级也更大，比如 `apple` 会被优先识别出来而不是单独的 `a` 字符。
-
 
 ### 随机音效
 
@@ -111,7 +109,7 @@ async def handle_otto(args: Message = CommandArg()):
 ```json
 {
   "special": {
-    "鬼叫|硅胶": [
+    "鬼叫|硅胶|啊啊啊": [
       "RANDOM",
       "鬼叫1.wav",
       "鬼叫2.wav",
@@ -124,7 +122,7 @@ async def handle_otto(args: Message = CommandArg()):
 }
 ```
 
-同理，我们可以用正则表达式来定义。
+同理，我们可以用正则表达式来定义。这会使得三个以上重复的 `啊` 也会使用鬼叫的音频，而单个的 `啊` 则不会，这是因为在这里我们按照正则表达式的长度来确定其优先级。
 
 ## 协议
 
