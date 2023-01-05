@@ -1,17 +1,19 @@
 import io
-import random
 import re
 import json
+import random
 import uvicorn
-from pathlib import Path
-from fastapi import FastAPI
-from fastapi.responses import StreamingResponse
-from pypinyin import lazy_pinyin
+
 from pydub import AudioSegment
 from pydub.effects import normalize
-from functools import reduce
-from typing import Iterable, Union, Optional
+
+from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
+
+from typing import Union, Optional
+from pathlib import Path
 from pydantic import BaseModel
+from pypinyin import lazy_pinyin
 
 
 ROOT = Path(__file__).parent
