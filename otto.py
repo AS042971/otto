@@ -14,6 +14,7 @@ from typing import Union, Optional
 from pathlib import Path
 from pydantic import BaseModel
 from pypinyin import lazy_pinyin
+from functools import lru_cache
 
 
 ROOT = Path(__file__).parent
@@ -51,6 +52,7 @@ REGEXES: list[tuple[str, re.Pattern]] = [
 SPECIAL_PATTERN = re.compile(f'({"|".join(regex for regex, _ in SPECIAL)})')
 
 
+@lru_cache()
 def get_special(fragment: str) -> Optional[Union[str, list[str]]]:
     """
     Gets special fragment audio file or file list.
@@ -99,6 +101,7 @@ def load_audio_file(filename: Union[str, list[str]]) -> AudioSegment:
     return sum(load_audio_file(file) for file in filename)
 
 
+@lru_cache()
 def load_pinyin_audio(pinyin: str) -> AudioSegment:
     """
     Loads pinyin. It will return a silent segment if not existing.
