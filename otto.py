@@ -48,7 +48,7 @@ REGEXES: list[tuple[str, re.Pattern]] = [
     for regex, _ in SPECIAL
 ]
 
-# The pattern with special regexes to break text.
+# The pattern with special regexes to cut text.
 SPECIAL_PATTERN = re.compile(f'({"|".join(regex for regex, _ in SPECIAL)})')
 
 
@@ -65,11 +65,11 @@ def get_special(fragment: str) -> Optional[Union[str, list[str]]]:
     return None
 
 
-def break_text(text: str) -> list[str]:
+def cut_text(text: str) -> list[str]:
     """
-    Breaks text into fragments.
+    Cuts text into fragments.
     Special ones are represented by their regexes.
-    :param text: the text to break.
+    :param text: the text to cut.
     :return: text fragments.
     """
     def replace_regex(fragment: str) -> str:
@@ -115,7 +115,7 @@ def load_pinyin_audio(pinyin: str) -> AudioSegment:
 
 def load_fragment_audio(fragment: str) -> AudioSegment:
     """
-    Loads audio for a fragment broken by `break_text`.
+    Loads audio for a fragment processed by `cut_text`.
     :param fragment: the fragment to load.
     :return: the audio segment.
     """
@@ -130,7 +130,7 @@ def make_audio(text: str) -> AudioSegment:
     :param text: the text to make an audio.
     :return: the audio segment.
     """
-    fragments = break_text(text)
+    fragments = cut_text(text)
     return sum(load_fragment_audio(frag) for frag in fragments)
 
 
