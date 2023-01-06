@@ -35,34 +35,24 @@ PORT: int = CONFIG['port']
 PINYIN: dict[str, str] = CONFIG['pinyin']
 
 # Special audio files.
+SPECIAL_DICT: dict[str, Union[str, list[str]]] = CONFIG['special']
+
 # Use sorted list to ensure that longer words are ahead of shorter ones.
-SPECIAL: list[tuple[str, Union[str, list[str]]]] = sorted(
-    CONFIG['special'].items(),
+# noinspection PyTypeChecker
+SPECIAL_LIST: list[tuple[str, Union[str, list[str]]]] = sorted(
+    SPECIAL_DICT.items(),
     key=lambda item: len(item[0]),
     reverse=True
 )
 
 # All regexes in the special dictionary.
-REGEXES: list[tuple[str, re.Pattern]] = [
+SPECIAL_REGEXES: list[tuple[str, re.Pattern]] = [
     (regex, re.compile(regex))
-    for regex, _ in SPECIAL
+    for regex, _ in SPECIAL_LIST
 ]
 
 # The pattern with special regexes to cut text.
-SPECIAL_PATTERN = re.compile(f'({"|".join(regex for regex, _ in SPECIAL)})')
-
-
-@lru_cache()
-def get_special(fragment: str) -> Optional[Union[str, list[str]]]:
-    """
-    Gets special fragment audio file or file list.
-    :param fragment: the fragment to get.
-    :return: the file or file list or None when it is not special.
-    """
-    for k, v in SPECIAL:
-        if k == fragment:
-            return v
-    return None
+SPECIAL_PATTERN = re.compile(f'({"|".join(regex for regex, _ in SPECIAL_LIST)})')
 
 
 def cut_text(text: str) -> list[str]:
@@ -74,7 +64,7 @@ def cut_text(text: str) -> list[str]:
     """
     def replace_regex(fragment: str) -> str:
         # Use regex to represent the fragment.
-        for regex, pattern in REGEXES:
+        for regex, pattern in SPECIAL_REGEXES:
             if pattern.fullmatch(fragment):
                 return regex
         return fragment
@@ -119,8 +109,8 @@ def load_fragment_audio(fragment: str) -> AudioSegment:
     :param fragment: the fragment to load.
     :return: the audio segment.
     """
-    if special := get_special(fragment):
-        return load_audio_file(special)
+    if fragment in SPECIAL_DICT:
+        return load_audio_file(SPECIAL_DICT[fragment])
     return sum(load_pinyin_audio(p) for p in lazy_pinyin(fragment))
 
 
