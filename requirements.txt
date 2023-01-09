@@ -3,3 +3,4 @@ fastapi
 pypinyin
 pydub
 pydantic
+matplotlib
