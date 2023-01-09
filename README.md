@@ -32,13 +32,19 @@
 
 ## 使用
 
-你可以直接访问 `http://localhost:8002/otto?text=实例文本` 来获得语音，或者集中到其它的 `App` 中使用。
+你可以直接访问 `GET /otto?text=文本` 来获得语音，也可以 `GET /otto/figure?text=文本` 来查看指定音频的波形。
 
-在这里我更推荐你在自己的 `App` 中使用 `POST` 方法，因为直接 `GET` 方法可能导致一些特殊字符，比如加号，不能正确地被接收。
+我推荐你在 `App` 中使用 `POST` 方法，因为直接 `GET` 方法可能导致一些特殊字符，比如加号，不能正确地被接收。
 
 这里以 [nonebot2](https://github.com/nonebot/nonebot2) 的 QQ 机器人为例，来演示如何将其集成到你的机器人中。
 
 ```python
+"""
+支持的命令，加不加空格无所谓:
+- otto text
+- otto fig text
+"""
+
 import aiohttp
 
 from nonebot import on_command
@@ -46,17 +52,30 @@ from nonebot.adapters import Message
 from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11.message import MessageSegment
 
+from urllib.parse import urljoin
+
 
 otto = on_command('otto')
+baseurl = 'http://localhost:8002'
+
+
+async def get_bytes(path: str, text: str) -> bytes:
+    async with aiohttp.ClientSession() as session:
+        async with session.post(urljoin(baseurl, path), json={'text': text}) as resp:
+            return await resp.read()
 
 
 @otto.handle()
 async def handle_otto(args: Message = CommandArg()):
     text = args.extract_plain_text()
-    async with aiohttp.ClientSession() as session:
-        async with session.post('http://localhost:8002/otto', json={'text': text}) as resp:
-            content = await resp.read()
-    await otto.finish(MessageSegment.record(content))
+    if not text.startswith('fig'):
+        record = await get_bytes('/otto', text)
+        await otto.finish(MessageSegment.record(record))
+        return
+
+    image = await get_bytes('/otto/figure', text.removeprefix('fig').strip())
+    await otto.finish(MessageSegment.image(image))
+
 ```
 
 这样就能在 QQ 中生成电棍语音了。
