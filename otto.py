@@ -26,33 +26,22 @@ from functools import lru_cache
 ROOT = Path(__file__).parent
 ASSETS_DIR = ROOT / 'assets'
 
-# Initialize matplotlib.
-matplotlib.use('agg')
 
-FONT_PROP = FontProperties(fname=ASSETS_DIR / 'font.otf')
+class Config(BaseModel):
+    port: int
+    font_size: int
+    sample_rate: int
+    silent_duration: int
+    pinyin: dict[str, str]
+    special: dict[str, Union[str, list[str]]]
 
 
-CONFIG = json.loads((ROOT / 'config.json').read_text('utf8'))
-
-# Silent audio segment duration(ms) for missing pinyin.
-MISSING_SILENT_DURATION: int = CONFIG['silentDuration']
-
-# Target sample rate.
-SAMPLE_RATE: int = CONFIG['sampleRate']
-
-# Server port.
-PORT: int = CONFIG['port']
-
-# Pinyin audio files.
-PINYIN: dict[str, str] = CONFIG['pinyin']
-
-# Special audio files.
-SPECIAL_DICT: dict[str, Union[str, list[str]]] = CONFIG['special']
+config: Config = Config.parse_file('config.json')
 
 # Use sorted list to ensure that longer words are ahead of shorter ones.
 # noinspection PyTypeChecker
 SPECIAL_LIST: list[tuple[str, Union[str, list[str]]]] = sorted(
-    SPECIAL_DICT.items(),
+    config.special.items(),
     key=lambda item: len(item[0]),
     reverse=True
 )
@@ -65,6 +54,11 @@ SPECIAL_REGEXES: list[tuple[str, re.Pattern]] = [
 
 # The pattern with special regexes to cut text.
 SPECIAL_PATTERN = re.compile(f'({"|".join(regex for regex, _ in SPECIAL_LIST)})')
+
+
+# Initialize matplotlib.
+matplotlib.use('agg')
+FONT_PROP = FontProperties(fname=ASSETS_DIR / 'font.otf', size=config.font_size)
 
 
 def cut_text(text: str) -> list[str]:
@@ -95,7 +89,7 @@ def load_audio_file(filename: Union[str, list[str]]) -> AudioSegment:
         return normalize(
             AudioSegment.from_file(ASSETS_DIR / filename)
             .set_channels(1)
-            .set_frame_rate(SAMPLE_RATE)
+            .set_frame_rate(config.sample_rate)
         )
 
     # Load a random audio from the list.
@@ -112,9 +106,9 @@ def load_pinyin_audio(pinyin: str) -> AudioSegment:
     :param pinyin: the pinyin to load.
     :return: the audio segment.
     """
-    if pinyin not in PINYIN:
-        return AudioSegment.silent(MISSING_SILENT_DURATION, SAMPLE_RATE)
-    return load_audio_file(PINYIN[pinyin])
+    if pinyin not in config.pinyin:
+        return AudioSegment.silent(config.silent_duration, config.sample_rate)
+    return load_audio_file(config.pinyin[pinyin])
 
 
 def load_fragment_audio(fragment: str) -> AudioSegment:
@@ -123,8 +117,8 @@ def load_fragment_audio(fragment: str) -> AudioSegment:
     :param fragment: the fragment to load.
     :return: the audio segment.
     """
-    if fragment in SPECIAL_DICT:
-        return load_audio_file(SPECIAL_DICT[fragment])
+    if fragment in config.special:
+        return load_audio_file(config.special[fragment])
     return sum(load_pinyin_audio(p) for p in lazy_pinyin(fragment))
 
 
@@ -180,4 +174,4 @@ async def handle_post_figure(body: Body):
 
 
 if __name__ == '__main__':
-    uvicorn.run('__main__:app', port=PORT)
+    uvicorn.run('__main__:app', port=config.port)

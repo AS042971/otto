@@ -1,7 +1,8 @@
 {
   "port": 8002,
-  "silentDuration": 500,
-  "sampleRate": 44100,
+  "font_size": 16,
+  "silent_duration": 500,
+  "sample_rate": 44100,
   "pinyin": {
     "a": "a.wav",
     "ai": "ai.wav",
