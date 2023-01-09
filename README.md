@@ -68,13 +68,13 @@ async def get_bytes(path: str, text: str) -> bytes:
 @otto.handle()
 async def handle_otto(args: Message = CommandArg()):
     text = args.extract_plain_text()
-    if not text.startswith('fig'):
-        record = await get_bytes('/otto', text)
-        await otto.finish(MessageSegment.record(record))
+    if text.startswith('fig'):
+        image = await get_bytes('/otto/figure', text.removeprefix('fig').strip())
+        await otto.finish(MessageSegment.image(image))
         return
 
-    image = await get_bytes('/otto/figure', text.removeprefix('fig').strip())
-    await otto.finish(MessageSegment.image(image))
+    record = await get_bytes('/otto', text)
+    await otto.finish(MessageSegment.record(record))
 
 ```
 
