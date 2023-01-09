@@ -10,7 +10,7 @@ from pydub.effects import normalize
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 
-from typing import Union, Optional
+from typing import Union
 from pathlib import Path
 from pydantic import BaseModel
 from pypinyin import lazy_pinyin
